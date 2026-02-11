@@ -3,7 +3,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const AppContext = createContext();
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const getApiUrl = () => {
+    let url = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    // Remove trailing slash if exists, then ensure it ends with /api
+    if (url && !url.endsWith('/api')) {
+        url = `${url.replace(/\/$/, '')}/api`;
+    }
+    return url;
+};
+
+const API_URL = getApiUrl();
 
 export const AppProvider = ({ children }) => {
     const [dishes, setDishes] = useState([]);

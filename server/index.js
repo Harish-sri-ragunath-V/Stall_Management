@@ -24,6 +24,9 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('MongoDB Connected'))
     .catch(err => console.error('MongoDB Connection Error:', err));
 
+// Root API Health Check
+app.get('/api', (req, res) => res.json({ status: 'API Active' }));
+
 // Dishes
 app.get('/api/dishes', async (req, res) => {
     try {
