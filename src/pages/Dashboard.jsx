@@ -89,7 +89,6 @@ const Dashboard = () => {
                     value={`₹${totalSales.toLocaleString()}`}
                     icon={DollarSign}
                     color="emerald"
-                    trend={15.8}
                     delay={0.2}
                 />
                 <StatCard
@@ -104,7 +103,6 @@ const Dashboard = () => {
                     value={`₹${netProfit.toLocaleString()}`}
                     icon={Activity}
                     color={netProfit >= 0 ? "indigo" : "orange"}
-                    trend={netProfit > 0 ? 12.4 : -5.2}
                     delay={0.4}
                 />
             </div>
