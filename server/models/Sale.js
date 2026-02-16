@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 
 const SaleSchema = new mongoose.Schema({
+    orderNo: { type: String, unique: true },
     date: { type: String, required: true },
     items: [{
         dishId: String,

@@ -77,7 +77,19 @@ app.get('/api/sales', async (req, res) => {
 
 app.post('/api/sales', async (req, res) => {
     try {
-        const newSale = new Sale(req.body);
+        const saleData = req.body;
+        if (!saleData.orderNo) {
+            const lastSale = await Sale.findOne().sort({ timestamp: -1 });
+            let nextOrderNo = 1;
+            if (lastSale && lastSale.orderNo) {
+                const lastNo = parseInt(lastSale.orderNo);
+                if (!isNaN(lastNo)) {
+                    nextOrderNo = lastNo + 1;
+                }
+            }
+            saleData.orderNo = nextOrderNo.toString();
+        }
+        const newSale = new Sale(saleData);
         const savedSale = await newSale.save();
         res.json({ ...savedSale._doc, id: savedSale._id });
     } catch (err) {

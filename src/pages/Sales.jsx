@@ -1,8 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Save, Calendar, CheckCircle, TrendingUp, Search } from 'lucide-react';
+import { Save, Calendar, CheckCircle, TrendingUp, Search, Download, Share2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 const SalesEntry = () => {
     const { dishes, addSale, sales, isAuthenticated } = useApp();
@@ -62,6 +64,111 @@ const SalesEntry = () => {
     );
 
     const filteredSales = sales.filter(s => s.date === viewDate);
+
+    const generatePDF = (sale) => {
+        const doc = new jsPDF();
+
+        // Premium Invoice Header
+        doc.setFillColor(15, 23, 42); // slate-950
+        doc.rect(0, 0, 210, 40, 'F');
+
+        doc.setFontSize(24);
+        doc.setTextColor(255, 255, 255);
+        doc.setFont("helvetica", "bold");
+        doc.text("E-HORIZON STALL", 14, 25);
+
+        doc.setFontSize(10);
+        doc.setTextColor(99, 102, 241); // indigo-400 equivalent
+        doc.text("OFFICIAL SALES INVOICE", 14, 32);
+
+        // Invoice Details
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Order Number:`, 14, 50);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0);
+        doc.text(`${sale.orderNo || 'N/A'}`, 45, 50);
+
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(100);
+        doc.text(`Transaction Date:`, 14, 57);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0);
+        doc.text(`${new Date(sale.date).toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}`, 45, 57);
+
+        // Table Config
+        const tableColumn = ["Item Description", "Unit Price", "Qty", "Subtotal"];
+        const tableRows = sale.items.map(item => [
+            item.name.toUpperCase(),
+            `INR ${item.price.toLocaleString()}`,
+            item.quantity,
+            `INR ${(item.price * item.quantity).toLocaleString()}`
+        ]);
+
+        autoTable(doc, {
+            head: [tableColumn],
+            body: tableRows,
+            startY: 65,
+            theme: 'grid',
+            headStyles: { fillColor: [79, 70, 229], textColor: [255, 255, 255], fontStyle: 'bold' },
+            bodyStyles: { textColor: [50, 50, 50] },
+            alternateRowStyles: { fillColor: [245, 247, 250] },
+            margin: { top: 65 },
+        });
+
+        const finalY = doc.lastAutoTable.finalY + 15;
+
+        // Summary Block
+        doc.setFillColor(248, 250, 252); // slate-50
+        doc.rect(130, finalY - 5, 65, 25, 'F');
+
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.setFont("helvetica", "bold");
+        doc.text("GRAND TOTAL", 135, finalY + 5);
+
+        doc.setFontSize(16);
+        doc.setTextColor(16, 185, 129); // emerald-500
+        doc.text(`INR ${sale.totalAmount.toLocaleString()}`, 135, finalY + 15);
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.setFont("helvetica", "italic");
+        doc.text("Thank you for your business! This is a computer-generated document.", 105, 285, { align: "center" });
+
+        return doc;
+    };
+
+    const downloadPDF = (sale) => {
+        const doc = generatePDF(sale);
+        doc.save(`Invoice_${sale.orderNo || 'sale'}.pdf`);
+    };
+
+    const sharePDF = async (sale) => {
+        const doc = generatePDF(sale);
+        const pdfBlob = doc.output('blob');
+        const fileName = `Invoice_${sale.orderNo || 'sale'}.pdf`;
+        const file = new File([pdfBlob], fileName, { type: 'application/pdf' });
+
+        if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+            try {
+                await navigator.share({
+                    files: [file],
+                    title: `Invoice ${sale.orderNo}`,
+                    text: `Sales invoice from E-Horizon Stall for order ${sale.orderNo}`
+                });
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Error sharing:', error);
+                    downloadPDF(sale);
+                }
+            }
+        } else {
+            downloadPDF(sale);
+        }
+    };
 
     return (
         <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 lg:space-y-12 pb-20">
@@ -283,15 +390,38 @@ const SalesEntry = () => {
                                                 <Calendar className="text-indigo-400 w-5 h-5" />
                                             </div>
                                             <div>
-                                                <p className="text-white font-black text-base sm:text-lg tracking-tight leading-none">
-                                                    {new Date(sale.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                </p>
+                                                <div className="flex items-center gap-2">
+                                                    <p className="text-white font-black text-base sm:text-lg tracking-tight leading-none">
+                                                        {new Date(sale.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    </p>
+                                                    <span className="bg-slate-800 text-indigo-400 text-[9px] font-black px-2 py-0.5 rounded-md border border-white/5 uppercase tracking-tighter">
+                                                        #{sale.orderNo || 'NEW'}
+                                                    </span>
+                                                </div>
                                                 <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Transaction Success</p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex-shrink-0">
-                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Total</p>
-                                            <p className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tighter">₹{sale.totalAmount.toLocaleString()}</p>
+                                        <div className="flex items-center gap-4">
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest leading-none mb-1">Total</p>
+                                                <p className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tighter">₹{sale.totalAmount.toLocaleString()}</p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() => downloadPDF(sale)}
+                                                    className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all border border-white/5 active:scale-90"
+                                                    title="Download Invoice"
+                                                >
+                                                    <Download className="w-5 h-5" />
+                                                </button>
+                                                <button
+                                                    onClick={() => sharePDF(sale)}
+                                                    className="w-10 h-10 bg-slate-950 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-indigo-600 transition-all border border-white/5 active:scale-90"
+                                                    title="Share Invoice"
+                                                >
+                                                    <Share2 className="w-5 h-5" />
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
 
