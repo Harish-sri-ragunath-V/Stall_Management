@@ -1,8 +1,10 @@
 
 import React, { useState } from 'react';
 import { TrendingUp, Lock, User, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
+import { useApp } from '../context/AppContext';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
+    const { login } = useApp();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -20,7 +22,7 @@ const Login = ({ onLogin }) => {
         // Simulate a bit of network delay for premium feel
         setTimeout(() => {
             if (username === DUMMY_USERNAME && password === DUMMY_PASSWORD) {
-                onLogin(true);
+                login(true);
             } else {
                 setError('Invalid username or password. Please try again.');
                 setIsLoading(false);

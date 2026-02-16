@@ -5,7 +5,7 @@ import { Save, Calendar, CheckCircle, TrendingUp, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const SalesEntry = () => {
-    const { dishes, addSale, sales } = useApp();
+    const { dishes, addSale, sales, isAuthenticated } = useApp();
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
     const [viewDate, setViewDate] = useState(new Date().toISOString().split('T')[0]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -146,21 +146,29 @@ const SalesEntry = () => {
 
                                         <div className="flex items-center justify-between gap-4">
                                             <div className="flex-1 flex items-center justify-between bg-slate-950/50 p-1.5 rounded-2xl border border-white/5">
-                                                <button
-                                                    onClick={() => handleQuantityChange(dish.id, (quantities[dish.id] || 0) - 1)}
-                                                    className="w-8 h-8 rounded-xl bg-slate-900 text-slate-400 font-black active:scale-95 transition-all text-sm"
-                                                >-</button>
-                                                <input
-                                                    type="number"
-                                                    value={quantities[dish.id] || ''}
-                                                    onChange={(e) => handleQuantityChange(dish.id, e.target.value)}
-                                                    className="bg-transparent text-white text-center font-black text-base w-8 focus:outline-none"
-                                                    placeholder="0"
-                                                />
-                                                <button
-                                                    onClick={() => handleQuantityChange(dish.id, (quantities[dish.id] || 0) + 1)}
-                                                    className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black active:scale-95 transition-all text-sm"
-                                                >+</button>
+                                                {isAuthenticated ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleQuantityChange(dish.id, (quantities[dish.id] || 0) - 1)}
+                                                            className="w-8 h-8 rounded-xl bg-slate-900 text-slate-400 font-black active:scale-95 transition-all text-sm"
+                                                        >-</button>
+                                                        <input
+                                                            type="number"
+                                                            value={quantities[dish.id] || ''}
+                                                            onChange={(e) => handleQuantityChange(dish.id, e.target.value)}
+                                                            className="bg-transparent text-white text-center font-black text-base w-8 focus:outline-none"
+                                                            placeholder="0"
+                                                        />
+                                                        <button
+                                                            onClick={() => handleQuantityChange(dish.id, (quantities[dish.id] || 0) + 1)}
+                                                            className="w-8 h-8 rounded-xl bg-indigo-600 text-white font-black active:scale-95 transition-all text-sm"
+                                                        >+</button>
+                                                    </>
+                                                ) : (
+                                                    <div className="flex-1 text-center py-2 text-slate-600 font-black text-[10px] uppercase tracking-widest">
+                                                        Login to edit
+                                                    </div>
+                                                )}
                                             </div>
                                             {(quantities[dish.id] || 0) > 0 && (
                                                 <div className="text-right">
@@ -212,20 +220,26 @@ const SalesEntry = () => {
                                 </div>
                             </div>
 
-                            <button
-                                onClick={handleSubmit}
-                                disabled={calculateTotal() === 0}
-                                className={`w-full py-5 sm:py-6 rounded-2xl sm:rounded-[2.5rem] font-black text-lg sm:text-xl transition-all duration-700 active:scale-95 flex items-center justify-center gap-4 ${isSubmitted
-                                    ? 'bg-emerald-500 text-white shadow-3xl shadow-emerald-500/20'
-                                    : 'bg-white text-slate-950 hover:bg-slate-100 shadow-3xl shadow-white/5 disabled:opacity-20 disabled:grayscale'
-                                    }`}
-                            >
-                                {isSubmitted ? (
-                                    <><CheckCircle className="w-6 h-6 sm:w-7 sm:h-7" /> Committed</>
-                                ) : (
-                                    <><Save className="w-6 h-6 sm:w-7 sm:h-7" /> Add Records</>
-                                )}
-                            </button>
+                            {isAuthenticated ? (
+                                <button
+                                    onClick={handleSubmit}
+                                    disabled={calculateTotal() === 0}
+                                    className={`w-full py-5 sm:py-6 rounded-2xl sm:rounded-[2.5rem] font-black text-lg sm:text-xl transition-all duration-700 active:scale-95 flex items-center justify-center gap-4 ${isSubmitted
+                                        ? 'bg-emerald-500 text-white shadow-3xl shadow-emerald-500/20'
+                                        : 'bg-white text-slate-950 hover:bg-slate-100 shadow-3xl shadow-white/5 disabled:opacity-20 disabled:grayscale'
+                                        }`}
+                                >
+                                    {isSubmitted ? (
+                                        <><CheckCircle className="w-6 h-6 sm:w-7 sm:h-7" /> Committed</>
+                                    ) : (
+                                        <><Save className="w-6 h-6 sm:w-7 sm:h-7" /> Add Records</>
+                                    )}
+                                </button>
+                            ) : (
+                                <div className="text-center p-6 bg-slate-950/50 border border-slate-800 rounded-2xl">
+                                    <p className="text-slate-500 text-xs font-black uppercase tracking-widest">Authentication Required for Sales Logging</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

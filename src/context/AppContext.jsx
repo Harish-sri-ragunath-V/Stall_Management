@@ -161,13 +161,27 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const [isAuthenticated, setIsAuthenticated] = useState(
+        localStorage.getItem('stall_auth') === 'true'
+    );
+
+    const login = (status) => {
+        setIsAuthenticated(status);
+        localStorage.setItem('stall_auth', status);
+    };
+
+    const logout = () => {
+        setIsAuthenticated(false);
+        localStorage.removeItem('stall_auth');
+    };
+
     return (
         <AppContext.Provider value={{
             dishes, addDish, updateDish, removeDish,
             sales, addSale,
             investors, addInvestor, updateInvestor, removeInvestor,
             expenses, addExpense, removeExpense,
-            loading
+            loading, isAuthenticated, login, logout
         }}>
             {children}
         </AppContext.Provider>

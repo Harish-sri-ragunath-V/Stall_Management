@@ -5,7 +5,7 @@ import { Users, UserPlus, TrendingUp, Search, Trash2, Edit2 } from 'lucide-react
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Investors = () => {
-    const { investors, addInvestor, updateInvestor, removeInvestor } = useApp();
+    const { investors, addInvestor, updateInvestor, removeInvestor, isAuthenticated } = useApp();
     const [formData, setFormData] = useState({ name: '', amount: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -58,12 +58,14 @@ const Investors = () => {
                             className="w-full bg-slate-950/50 border border-slate-800 rounded-2xl pl-12 pr-4 py-3.5 text-white focus:outline-none focus:border-indigo-500 transition-all text-sm font-medium"
                         />
                     </div>
-                    <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
-                    >
-                        <UserPlus className="w-5 h-5 flex-shrink-0" /> <span className="text-[10px] uppercase font-black tracking-widest">Add Partner</span>
-                    </button>
+                    {isAuthenticated && (
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-2xl font-black transition-all shadow-xl shadow-indigo-600/20 active:scale-95"
+                        >
+                            <UserPlus className="w-5 h-5 flex-shrink-0" /> <span className="text-[10px] uppercase font-black tracking-widest">Add Partner</span>
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -105,10 +107,12 @@ const Investors = () => {
                                     </div>
                                     <span className="font-bold text-white text-sm truncate max-w-[120px]">{investor.name}</span>
                                 </div>
-                                <div className="flex gap-2">
-                                    <button onClick={() => openEdit(investor)} className="p-2 bg-slate-950 rounded-xl text-slate-400 border border-white/5"><Edit2 className="w-3.5 h-3.5" /></button>
-                                    <button onClick={() => removeInvestor(investor.id)} className="p-2 bg-slate-950 rounded-xl text-rose-500 border border-white/5"><Trash2 className="w-3.5 h-3.5" /></button>
-                                </div>
+                                {isAuthenticated && (
+                                    <div className="flex gap-2">
+                                        <button onClick={() => openEdit(investor)} className="p-2 bg-slate-950 rounded-xl text-slate-400 border border-white/5"><Edit2 className="w-3.5 h-3.5" /></button>
+                                        <button onClick={() => removeInvestor(investor.id)} className="p-2 bg-slate-950 rounded-xl text-rose-500 border border-white/5"><Trash2 className="w-3.5 h-3.5" /></button>
+                                    </div>
+                                )}
                             </div>
                             <div className="flex justify-between items-end pt-2">
                                 <p className="text-[10px] text-slate-500 font-medium">Joined {new Date(investor.date || new Date()).toLocaleDateString()}</p>
@@ -127,7 +131,7 @@ const Investors = () => {
                                     <th className="px-10 py-5 text-nowrap">Name</th>
                                     <th className="px-10 py-5">Joined</th>
                                     <th className="px-10 py-5">Investment</th>
-                                    <th className="px-10 py-5 text-right">Actions</th>
+                                    {isAuthenticated && <th className="px-10 py-5 text-right">Actions</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/50">
@@ -147,12 +151,14 @@ const Investors = () => {
                                         <td className="px-10 py-6">
                                             <span className="font-black text-emerald-400 text-lg">₹{investor.amount.toLocaleString()}</span>
                                         </td>
-                                        <td className="px-10 py-6 text-right">
-                                            <div className="flex justify-end gap-2 outline-none">
-                                                <button onClick={() => openEdit(investor)} className="p-2.5 bg-slate-950 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white border border-white/5 transition-all"><Edit2 className="w-4 h-4" /></button>
-                                                <button onClick={() => removeInvestor(investor.id)} className="p-2.5 bg-slate-950 hover:bg-rose-500/10 rounded-xl text-slate-400 hover:text-rose-500 border border-white/5 transition-all"><Trash2 className="w-4 h-4" /></button>
-                                            </div>
-                                        </td>
+                                        {isAuthenticated && (
+                                            <td className="px-10 py-6 text-right">
+                                                <div className="flex justify-end gap-2 outline-none">
+                                                    <button onClick={() => openEdit(investor)} className="p-2.5 bg-slate-950 hover:bg-white/10 rounded-xl text-slate-400 hover:text-white border border-white/5 transition-all"><Edit2 className="w-4 h-4" /></button>
+                                                    <button onClick={() => removeInvestor(investor.id)} className="p-2.5 bg-slate-950 hover:bg-rose-500/10 rounded-xl text-slate-400 hover:text-rose-500 border border-white/5 transition-all"><Trash2 className="w-4 h-4" /></button>
+                                                </div>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>

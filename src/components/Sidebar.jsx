@@ -1,8 +1,10 @@
 
 import { LayoutDashboard, Utensils, IndianRupee, PieChart, Users, TrendingUp, X, Activity } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import { useApp } from '../context/AppContext';
 
 const Sidebar = ({ isOpen, onClose }) => {
+    const { isAuthenticated } = useApp();
     const links = [
         { to: '/', label: 'Dashboard', icon: LayoutDashboard },
         { to: '/entry', label: 'Sales Console', icon: IndianRupee },
@@ -11,6 +13,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         { to: '/performance', label: 'Performance', icon: Activity },
         { to: '/investors', label: 'Partners', icon: Users },
     ];
+
+    if (!isAuthenticated) {
+        links.push({ to: '/login', label: 'Login', icon: TrendingUp });
+    }
 
     return (
         <>
